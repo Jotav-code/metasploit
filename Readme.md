@@ -60,4 +60,57 @@ O que ele faz é modificar o payload original a fim de escapar de AV, alterar sh
 
 - Alterar shellcode: shellcode é executado diretamente na memória, Problema: tamannho importa, caracterer proibidos existem, memória tem restrinções, arquitetura específica. O encoder transformma o shellcode em outra representação, ele adiciona um mini decodificador [decoder][payload codificado]
 
-O encodedr pode ajudar ou atrapalhar, depende do seu exploit
+O encodeder pode ajudar ou atrapalhar, depende do seu exploit
+
+### Evasion
+
+O evasion é outra forma de tentar burlar os antivírus, monitoramento de comportamento, EDR, windows defender. Quando um payload executa no sistema, o sistema pode detectar:
+
+- criação suspeita de processo
+- injeção em memória
+- conexão reversa
+- PowerShell suspeito
+- shellcode em memória
+- APIs maliciosas
+- comportamento anormal
+
+então o envasion tenta deixa o payload "normal". Como é feito isso: 
+- Ofuscação, muda nomes, strings, comandos, estrutura do código
+- Process Injection: Ele pega um processo que está rodando na máquina e injeta o código dentro dele. Exemplo: o user está com firefox aberto, a gente consegue injetar esse código dentro do processo do firefox, assim fica mais difícil a detecção
+- Reflective Loading: DLL carregada diretamente na memória, sem trocar disco ou criar arquivo, assim a gente consegue evitar scanner de arquivos.
+- Syscalls diretas: EDRs ficam monitorando a máquina, fica difícil passar por elas. EDRs monitoram APIs do Windows, VirtuaAlloc, CreateRemoteThread, WriteProcessMemory,  então a solução é fazer uma chamada de sistema direto
+- Sleep Masking: O malware dorme, simples, quando ele deteccta uma análise ele dorme para parecer inofensivo.
+
+### NOP
+Instrução "não faça nada", o que a cpu faz "executa e vai para o próximo byte", o NOP existe porque na exploração é difícil achar o endereço exato. Queremos executar o shellcode, mas o ASLR, offsets, stack, memória, alinhamento dificultam acertar, então criamos o [NOP NOP NOP NOP shellcode]
+
+O que acontece é o seguinte, mesmo errando pouco o CPU cai nos NOPs, desliza e chega no shellcode, chamamos de NOP sled. Sem o NOP sled, temos que acertar o endereço exato. samos muito em shellcode injection e entre outros.
+
+### AUXILIARY
+Coisa que usamos muito no metasploit são os auxiliares. Eles servem para gente estudar a vítima antes do ataque, podemos: scannear, fazer enumeração, brute force, fuzzing, coleta de informações, sniffing, spoofing e entre outros. Ele não necessariamente exploram vulnerabilidade.
+
+- Exemplo
+  - auxiliary/scanner/smb/smb_version, descobre versão do SMB
+  - auxiliary/scanner/ssh/ssh_login, SSH brute force
+  - auxiliary/scanner/portscan/tcp, Port scan
+  - auxiliary/scanner/ftp/anonymous FTP anonymous login
+  - fuzzers enviam dados aleatórios para tentar crashar o programa
+
+### POST
+
+Usamos ele quando estamos dentro da máquina, para expandir o controle. fazemos:
+- enumeração interna
+- coleta de credenciais
+- pivoting
+- privilege escalation
+- persistência
+- dump hashes
+- coleta de arquivos
+- screenshots
+
+Exemplos reais
+- run post/windows/gather/hashdump, extrai hashes de senhas
+- post/windows/gather/enum_applications, enumera softwares
+- post/windows/gather/enum_logged_on_users, enumera users
+- post/windows/manage/screenshot, captura imagem
+- post/multi/recon/local_exploit_suggester, escalação de privilégio
